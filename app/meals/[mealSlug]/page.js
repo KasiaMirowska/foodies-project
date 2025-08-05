@@ -4,7 +4,6 @@ import { getMeal } from "@/dataFetching/meals";
 import { notFound } from "next/navigation";
 
 export default async function MealDetailsPage({ params }) {
-  console.log("PPPPP", params);
   const meal = getMeal(params.mealSlug);
 
   if (!meal) {

@@ -1,6 +1,13 @@
 "use server";
+import { revalidatePath } from "next/cache";
+import { saveMeal } from "./meals";
+import { redirect } from "next/navigation";
 
-export async function shareMeal(formData) {
+const isInvalidText = (text) => {
+  return !text || text.trim() === "";
+};
+
+export async function shareMeal(prevState, formData) {
   const meal = {
     title: formData.get("title"),
     summary: formData.get("summary"),
@@ -9,5 +16,21 @@ export async function shareMeal(formData) {
     creator: formData.get("name"),
     creator_email: formData.get("email"),
   };
-  console.log("MMMM", meal);
+
+  if (
+    isInvalidText(meal.title) ||
+    isInvalidText(meal.summary) ||
+    isInvalidText(meal.instructions) ||
+    isInvalidText(meal.creator_email) ||
+    isInvalidText(meal.creator) ||
+    !meal.creator_email.includes("@") ||
+    !meal.image ||
+    meal.image.size === 0
+  ) {
+    return { message: "Invalid input" };
+  }
+
+  await saveMeal(meal);
+  revalidatePath("/meals"); //refreshes the cach after we added new meal
+  redirect("/meals");
 }
